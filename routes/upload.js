@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
-const dbConfig = require('../db');
+const { poolPromise } = require("../db");
 const multer = require('multer');
 
 // Multer para manejar archivos PDF en memoria
