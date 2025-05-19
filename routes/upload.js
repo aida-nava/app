@@ -1,4 +1,3 @@
-// routes/upload.js
 const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
@@ -8,8 +7,10 @@ const multer = require('multer');
 // Multer para manejar archivos PDF en memoria
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
+
+// POST /pdf
 router.post('/', upload.single('pdf'), async (req, res) => {
-   res.send('🚀 ¡Tu API está funcionando correctamente en Railway!');
+   res.send('🚀 ¡Tu API está funcionando!');
   try {
     const { matricula } = req.body;
     if (!matricula || !req.file) {
@@ -19,8 +20,8 @@ router.post('/', upload.single('pdf'), async (req, res) => {
     const fileBuffer = req.file.buffer;
     const fileName = req.file.originalname;
 
-    await sql.connect(dbConfig);
-    const request = new sql.Request();
+    const pool = await poolPromise;
+    const request = pool.request();
     request.input('matricula', sql.VarChar, matricula);
     request.input('fileName', sql.NVarChar, fileName);
     request.input('fileData', sql.VarBinary(sql.MAX), fileBuffer);
@@ -32,12 +33,24 @@ router.post('/', upload.single('pdf'), async (req, res) => {
 
     res.status(200).json({ message: 'PDF y matrícula guardados correctamente.' });
   } catch (err) {
-  console.error('❌ Error al subir PDF (detalle completo):', err); // esto imprime todo
-  res.status(500).json({
-    error: err.message || 'Error desconocido',
-    stack: err.stack, // puedes eliminar esto luego
-  });
-}
+    console.error('❌ Error al subir PDF:', err);
+    res.status(500).json({ error: 'Error al guardar en la base de datos.' });
+  }
+});
+
+// GET /pdf
+router.get('/', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query(`
+      SELECT Id, Matricula, FileName, UploadDate FROM PdfFiles ORDER BY UploadDate DESC
+    `);
+
+    res.json(result.recordset);
+  } catch (err) {
+    console.error('❌ Error al listar PDFs:', err);
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
