@@ -9,7 +9,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.post('/vaucher', upload.single('pdf'), async (req, res) => {
+router.post('/', async (req, res) => {
   try {
     const { matricula } = req.body;
     if (!matricula || !req.file) {
