@@ -31,9 +31,12 @@ router.post('/', upload.single('pdf'), async (req, res) => {
 
     res.status(200).json({ message: 'PDF y matrícula guardados correctamente.' });
   } catch (err) {
-    console.error('Error al subir PDF:', err);
-    res.status(500).json({ error: 'Error al guardar en la base de datos.' });
-  }
+  console.error('❌ Error al subir PDF (detalle completo):', err); // esto imprime todo
+  res.status(500).json({
+    error: err.message || 'Error desconocido',
+    stack: err.stack, // puedes eliminar esto luego
+  });
+}
 });
 
 module.exports = router;
