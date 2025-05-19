@@ -12,6 +12,11 @@ app.use('/pdf', uploadRoutes);
 app.use("/users", usersRouter);
 
 const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send('🚀 ¡Tu API está funcionando correctamente en Railway!');
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 API corriendo en http://localhost:${PORT}`);
 });
