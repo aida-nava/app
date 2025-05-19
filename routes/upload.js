@@ -10,7 +10,7 @@ const upload = multer({ storage });
 
 // POST /pdf
 router.post('/', upload.single('pdf'), async (req, res) => {
-   res.send('🚀 ¡Tu API está funcionando!');
+
   try {
     const { matricula } = req.body;
     if (!matricula || !req.file) {
