@@ -20,7 +20,7 @@ router.post('/', upload.single('pdf'), async (req, res) => {
 
     await sql.connect(dbConfig);
     const request = new sql.Request();
-    request.input('matricula', sql.NVarChar, matricula);
+    request.input('matricula', sql.VarChar, matricula);
     request.input('fileName', sql.NVarChar, fileName);
     request.input('fileData', sql.VarBinary(sql.MAX), fileBuffer);
 
