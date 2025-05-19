@@ -9,6 +9,7 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 router.post('/', upload.single('pdf'), async (req, res) => {
+   res.send('🚀 ¡Tu API está funcionando correctamente en Railway!');
   try {
     const { matricula } = req.body;
     if (!matricula || !req.file) {
