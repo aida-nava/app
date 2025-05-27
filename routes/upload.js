@@ -8,28 +8,36 @@ const multer = require('multer');
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// POST /pdf
+// ✅ POST /pdf → Guarda PDF en la base de datos
 router.post('/', upload.single('pdf'), async (req, res) => {
-
   try {
     const { matricula } = req.body;
     if (!matricula || !req.file) {
       return res.status(400).json({ error: 'Faltan datos: matrícula o archivo.' });
     }
 
+    const pool = await poolPromise;
+
+    // Verifica si ya existe un PDF con esa matrícula
+    const check = await pool.request()
+      .input('matricula', sql.VarChar, matricula)
+      .query('SELECT COUNT(*) as total FROM PdfFiles WHERE Matricula = @matricula');
+
+    if (check.recordset[0].total > 0) {
+      return res.status(409).json({ error: 'Ya existe un PDF para esta matrícula.' });
+    }
+
     const fileBuffer = req.file.buffer;
     const fileName = req.file.originalname;
 
-    const pool = await poolPromise;
-    const request = pool.request();
-    request.input('matricula', sql.VarChar, matricula);
-    request.input('fileName', sql.NVarChar, fileName);
-    request.input('fileData', sql.VarBinary(sql.MAX), fileBuffer);
-
-    await request.query(`
-      INSERT INTO PdfFiles (Matricula, FileName, FileData)
-      VALUES (@matricula, @fileName, @fileData)
-    `);
+    await pool.request()
+      .input('matricula', sql.VarChar, matricula)
+      .input('fileName', sql.NVarChar, fileName)
+      .input('fileData', sql.VarBinary(sql.MAX), fileBuffer)
+      .query(`
+        INSERT INTO PdfFiles (Matricula, FileName, FileData)
+        VALUES (@matricula, @fileName, @fileData)
+      `);
 
     res.status(200).json({ message: 'PDF y matrícula guardados correctamente.' });
   } catch (err) {
@@ -38,7 +46,28 @@ router.post('/', upload.single('pdf'), async (req, res) => {
   }
 });
 
-// GET /pdf
+// ✅ GET /pdf/:matricula → Verifica si ya existe PDF para esa matrícula
+router.get('/:matricula', async (req, res) => {
+  try {
+    const { matricula } = req.params;
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .input('matricula', sql.VarChar, matricula)
+      .query('SELECT Id FROM PdfFiles WHERE Matricula = @matricula');
+
+    if (result.recordset.length > 0) {
+      res.status(200).json({ message: 'PDF ya existe para esta matrícula.' });
+    } else {
+      res.status(404).json({ message: 'No se encontró PDF para esta matrícula.' });
+    }
+  } catch (err) {
+    console.error('❌ Error al verificar PDF:', err);
+    res.status(500).json({ error: 'Error al verificar existencia del PDF.' });
+  }
+});
+
+// GET /pdf → Lista de todos los PDFs
 router.get('/', async (req, res) => {
   try {
     const pool = await poolPromise;
