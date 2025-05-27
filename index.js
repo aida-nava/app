@@ -8,8 +8,18 @@ app.use(express.json());
 
 const usersRouter = require("./routes/users");
 const uploadRoutes = require('./routes/upload');
+const gruposRoutes = require('./routes/grupo');
+const horarioRoutes = require('./routes/horario');
+const materiasRoutes = require('./routes/materia');
+
+
 app.use('/pdf', uploadRoutes);
 app.use("/users", usersRouter);
+app.use('/grupos', gruposRoutes);
+app.use('/horario', horarioRoutes);
+app.use('/materias', materiasRoutes);
+
+
 
 const PORT = process.env.PORT || 3000;
 
