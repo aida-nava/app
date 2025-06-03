@@ -1,4 +1,3 @@
-// routes/horario.js
 const express = require('express');
 const router = express.Router();
 const sql = require('mssql');
@@ -11,12 +10,20 @@ router.get('/:idGrupo', async (req, res) => {
       .request()
       .input('idGrupo', sql.VarChar, req.params.idGrupo)
       .query(`
-        SELECT M.Nombre AS materia, D.Nombre AS docente, H.Dia, H.inicio, H.fin, H.aula
-        FROM HGM H
-        JOIN Materia M ON H.idMateria = M.idMateria
-        JOIN Docentes D ON H.idDocente = D.idDocente
-        WHERE H.idGrupo = @idGrupo
-        ORDER BY H.Dia, H.inicio
+        SELECT 
+  C.idClase,
+  M.Nombre AS materia,
+  D.Nombre AS docente,
+  H.Dia,
+  H.inicio,
+  H.fin,
+  C.aula
+FROM HGM H
+JOIN Clases C ON H.idClase = C.idClase
+JOIN Materia M ON C.idMateria = M.idMateria
+JOIN Docentes D ON C.idDocente = D.idDocente
+WHERE C.idGrupo = @idGrupo
+ORDER BY H.Dia, H.inicio;
       `);
 
     res.json(result.recordset);
