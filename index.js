@@ -11,6 +11,7 @@ const uploadRoutes = require('./routes/upload');
 const gruposRoutes = require('./routes/grupo');
 const horarioRoutes = require('./routes/horario');
 const materiasRoutes = require('./routes/materia');
+const inscripcionRoutes = require('./routes/inscripcion');
 
 
 app.use('/pdf', uploadRoutes);
@@ -18,6 +19,7 @@ app.use("/users", usersRouter);
 app.use('/grupos', gruposRoutes);
 app.use('/horario', horarioRoutes);
 app.use('/materias', materiasRoutes);
+app.use('/inscripciones', inscripcionRoutes);
 
 
 
