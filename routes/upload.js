@@ -18,7 +18,6 @@ router.post('/', upload.single('pdf'), async (req, res) => {
 
     const pool = await poolPromise;
 
-    // Verifica si ya existe un PDF con esa matrícula
     const check = await pool.request()
       .input('matricula', sql.VarChar, matricula)
       .query('SELECT COUNT(*) as total FROM PdfFiles WHERE Matricula = @matricula');
@@ -67,7 +66,7 @@ router.get('/:matricula', async (req, res) => {
   }
 });
 
-// GET /pdf → Lista de todos los PDFs
+// ✅ GET /pdf → Lista de todos los PDFs
 router.get('/', async (req, res) => {
   try {
     const pool = await poolPromise;
@@ -82,4 +81,28 @@ router.get('/', async (req, res) => {
   }
 });
 
+// ✅ GET /pdf/url/:matricula → Redirige directamente a la vista del PDF
+router.get('/view/:matricula', async (req, res) => {
+  try {
+    const { matricula } = req.params;
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .input('matricula', sql.VarChar, matricula)
+      .query('SELECT FileName, FileData FROM PdfFiles WHERE Matricula = @matricula');
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ error: 'No se encontró el PDF.' });
+    }
+
+    const pdf = result.recordset[0];
+
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', `inline; filename="${pdf.FileName}"`);
+    res.send(pdf.FileData);
+  } catch (err) {
+    console.error('❌ Error al ver PDF:', err);
+    res.status(500).json({ error: 'Error al obtener el PDF.' });
+  }
+});
 module.exports = router;
