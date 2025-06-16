@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { sql, poolPromise } = require('../db');
-
+const multer = require('multer');
 // GET alumno por matrícula
 router.get('/:matricula', async (req, res) => {
   try {
