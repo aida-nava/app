@@ -3,6 +3,16 @@ const router = express.Router();
 const { sql, poolPromise } = require('../db');
 const multer = require('multer');
 // GET alumno por matrícula
+router.get('/', async (req, res) => {
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request().query('SELECT * FROM Alumnos');
+    res.json(result.recordset);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 router.get('/:matricula', async (req, res) => {
   try {
     const pool = await poolPromise;
