@@ -9,18 +9,24 @@ const config = {
   options: {
     encrypt: true,
     enableArithAbort: true,
+    trustServerCertificate: true, // 🔒 agrega esto si estás en localhost
   },
 };
 
+// 💡 Esta es la diferencia: lanzamos el error para que pueda capturarse correctamente en la app
 const poolPromise = new sql.ConnectionPool(config)
   .connect()
   .then(pool => {
-    console.log("✅ Conectado a SQL Azure");
+    console.log("✅ Conectado a SQL Server");
     return pool;
   })
-  .catch(err => console.error("❌ Error de conexión:", err));
+  .catch(err => {
+    console.error("❌ Error de conexión con SQL Server:", err);
+    throw err; // 💥 Esto es clave para que `await poolPromise` dispare el catch
+  });
 
 module.exports = {
   sql,
   poolPromise,
 };
+
