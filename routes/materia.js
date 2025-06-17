@@ -58,7 +58,7 @@ router.post('/', async (req, res) => {
 });
 
 // Obtener una clase por idClase
-router.get('/:idClase', async (req, res) => {
+router.get('/clases/:idClase', async (req, res) => {
   try {
     const pool = await poolPromise;
     const result = await pool
