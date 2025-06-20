@@ -14,6 +14,8 @@ const materiasRoutes = require('./routes/materia');
 const inscripcionRoutes = require('./routes/inscripcion');
 const alumnoRoutes = require('./routes/alumnosadm');
 const adminRoutes = require('./routes/admin');
+const docentesRoutes = require('./routes/docentes');
+
 
 
 app.use('/pdf', uploadRoutes);
@@ -24,6 +26,7 @@ app.use('/materias', materiasRoutes);
 app.use('/inscripciones', inscripcionRoutes);
 app.use('/alumnos', alumnoRoutes);
 app.use('/admin', adminRoutes); 
+app.use('/docentes', docentesRoutes);
 
 
 const PORT = process.env.PORT || 3000;
