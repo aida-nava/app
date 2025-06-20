@@ -1,5 +1,5 @@
 const express = require('express');
-const bcrypt = require('bcrypt'); // tu conexión a SQL Server
+
 const sql = require('mssql');
 
 const router = express.Router();
