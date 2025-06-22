@@ -99,6 +99,56 @@ router.delete('/:matricula', async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+// GET /alumnos/:matricula/horario
+
+router.get('/:matricula/horario', async (req, res) => {
+  const { matricula } = req.params;
+
+  try {
+    const pool = await poolPromise;
+
+    const result = await pool.request()
+      .input('matricula', matricula)
+      .query(`
+        SELECT 
+          a.Matricula,
+          a.Nombre,
+          g.Nombre AS Grupo,
+          m.Nombre AS Materia,
+          d.Nombre AS Docente,
+          c.aula,
+          h.Dia,
+          FORMAT(h.inicio, 'hh\\:mm') AS Inicio,
+          FORMAT(h.fin, 'hh\\:mm') AS Fin
+        FROM Inscripciones i
+        JOIN Alumnos a ON i.idAlumno = a.Matricula
+        JOIN HGM h ON i.idHGM = h.idHGM
+        JOIN Clases c ON h.idClase = c.idClase
+        JOIN Grupo g ON c.idGrupo = g.idGrupo
+        JOIN Materia m ON c.idMateria = m.idMateria
+        JOIN Docentes d ON c.idDocente = d.idDocente
+        WHERE a.Matricula = @matricula
+        ORDER BY 
+          CASE 
+            WHEN h.Dia = 'Lunes' THEN 1
+            WHEN h.Dia = 'Martes' THEN 2
+            WHEN h.Dia = 'Miércoles' THEN 3
+            WHEN h.Dia = 'Jueves' THEN 4
+            WHEN h.Dia = 'Viernes' THEN 5
+            ELSE 6
+          END, h.inicio
+      `);
+
+    if (result.recordset.length === 0) {
+      return res.status(404).json({ mensaje: 'No se encontró horario para este alumno.' });
+    }
+
+    res.json(result.recordset);
+  } catch (error) {
+    console.error('Error al obtener el horario del alumno:', error);
+    res.status(500).json({ mensaje: 'Error del servidor' });
+  }
+});
 
 router.get('/info/:matricula', async (req, res) => {
   try {
@@ -170,10 +220,7 @@ router.put('/info/:matricula', async (req, res) => {
           UPDATE Alumnos 
           SET 
             nombre = @nombre, 
-            email = @email, 
-            semestre = @semestre, 
-            estado = @estado, 
-            Adeudo = @adeudo 
+            email = @email
           WHERE Matricula = @matricula;
 
           UPDATE InfoAlumno
