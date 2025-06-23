@@ -73,4 +73,25 @@ router.post('/', async (req, res) => {
   }
 });
 
+
+router.get('/info/:idAlumno', async (req, res) => {
+  const { idAlumno } = req.params;
+
+  try {
+    const pool = await poolPromise;
+    const result = await pool.request()
+      .input('idAlumno', sql.VarChar, idAlumno)
+      .query('SELECT * FROM Inscripciones WHERE idAlumno = @idAlumno');
+
+    if (result.recordset.length > 0) {
+      res.status(200).json({ existe: true, inscripcion: result.recordset[0] });
+    } else {
+      res.status(200).json({ existe: false });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 module.exports = router;
